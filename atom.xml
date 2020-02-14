@@ -5,9 +5,9 @@
   
   <link href="/atom.xml" rel="self"/>
   
-  <link href="http://liditingziya.github.io/"/>
+  <link href="http://liditingzi.work/"/>
   <updated>2020-02-14T12:48:34.308Z</updated>
-  <id>http://liditingziya.github.io/</id>
+  <id>http://liditingzi.work/</id>
   
   <author>
     <name>John Doe</name>
@@ -18,8 +18,8 @@
   
   <entry>
     <title>Hello World</title>
-    <link href="http://liditingziya.github.io/2020/02/14/hello-world/"/>
-    <id>http://liditingziya.github.io/2020/02/14/hello-world/</id>
+    <link href="http://liditingzi.work/2020/02/14/hello-world/"/>
+    <id>http://liditingzi.work/2020/02/14/hello-world/</id>
     <published>2020-02-14T12:48:34.307Z</published>
     <updated>2020-02-14T12:48:34.308Z</updated>
     
