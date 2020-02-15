@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
   <title>Tim</title>
   
-  <subtitle>霆仔</subtitle>
+  <subtitle>tingzai</subtitle>
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://liditingzi.work/"/>
@@ -10,7 +10,7 @@
   <id>http://liditingzi.work/</id>
   
   <author>
-    <name>John Doe</name>
+    <name>霆仔</name>
     
   </author>
   
