@@ -4,6 +4,44 @@
   
     
     <entry>
+      <title>备忘录之CodeFirst</title>
+      <link href="/posts/d708680b.html"/>
+      <url>/posts/d708680b.html</url>
+      
+        <content type="html"><![CDATA[<blockquote><p>最近老是忘掉CodeFirst咋写, 于是写一下记录一下</p></blockquote><h2 id="先写实体类"><a href="#先写实体类" class="headerlink" title="先写实体类"></a>先写实体类</h2><h2 id="添加Nuget包引用"><a href="#添加Nuget包引用" class="headerlink" title="添加Nuget包引用"></a>添加Nuget包引用</h2><ol><li>Microsoft.EntityFramework</li><li>Microsoft.EntityFramework.Tool (使用EFCore命令行需要使用的库)</li><li>Microsoft.EntityFramework.Relational (配置关系时需要的包)</li><li>Microsoft.EntityFramework.SqlServer (使用SqlServer数据库)</li></ol><h2 id="创建DbContext"><a href="#创建DbContext" class="headerlink" title="创建DbContext"></a>创建DbContext</h2><p>创建一个DbContext继承自DbContext<br>构造函数继承父类的</p><figure class="highlight csharp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="title">LotteryDbContext</span>(<span class="params">DbContextOptions&lt;LotteryDbContext&gt; opt</span>): <span class="title">base</span>(<span class="params">opt</span>)</span></span><br><span class="line">&#123;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><p>重写一下OnModelCreating方法<br><figure class="highlight csharp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">protected</span> <span class="keyword">override</span> <span class="keyword">void</span> <span class="title">OnModelCreating</span>(<span class="params">ModelBuilder modelBuilder</span>)</span></span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">base</span>.OnModelCreating(modelBuilder);</span><br><span class="line">    modelBuilder.ConfigureModel(); <span class="comment">// 自定义的扩展方法</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p><figure class="highlight csharp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">ConfigureModel</span>(<span class="params"><span class="keyword">this</span> ModelBuilder builder</span>)</span></span><br><span class="line">&#123;</span><br><span class="line">    <span class="comment">// 这里配置关系 eg:</span></span><br><span class="line">    builder.Entity&lt;类名&gt;(b =&gt; &#123;</span><br><span class="line">        b.ToTable(<span class="string">&quot;表名&quot;</span>, _ =&gt; _.HasComment(<span class="string">&quot;表的注释&quot;</span>));</span><br><span class="line">    &#125;);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><h2 id="在Program-cs里面注册DbContext"><a href="#在Program-cs里面注册DbContext" class="headerlink" title="在Program.cs里面注册DbContext"></a>在Program.cs里面注册DbContext</h2><figure class="highlight csharp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 原生EFCore的配置方式</span></span><br><span class="line">builder.Services.AddDbContext&lt;LotteryDbContext&gt;((sp, optionsBuilder) =&gt;</span><br><span class="line">&#123;</span><br><span class="line">    <span class="comment">// 可以自定义拦截器</span></span><br><span class="line">    <span class="comment">// var addOrUpdateInterceptor = sp.GetService&lt;AddOrUpdateInterceptor&gt;();</span></span><br><span class="line">    optionsBuilder.UseSqlServer(builder.Configuration.GetConnectionString(<span class="string">&quot;配置Key&quot;</span>)); <span class="comment">// 从配置文件的Connection中读取Lottery</span></span><br><span class="line">        <span class="comment">// .AddInterceptors(addOrUpdateInterceptor!);</span></span><br><span class="line">&#125;);  </span><br></pre></td></tr></table></figure><p>在application.json文件中添加连接字符串<br><figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">&quot;ConnectionStrings&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span></span><br><span class="line">    <span class="attr">&quot;配置Key&quot;</span><span class="punctuation">:</span> <span class="string">&quot;Server=localhost;Database=数据库名;Trusted_Connection=True;TrustServerCertificate=True;&quot;</span><span class="punctuation">,</span></span><br><span class="line">  <span class="punctuation">&#125;</span></span><br></pre></td></tr></table></figure></p><h2 id="直接使用插件或者命令行生成数据库"><a href="#直接使用插件或者命令行生成数据库" class="headerlink" title="直接使用插件或者命令行生成数据库"></a>直接使用插件或者命令行生成数据库</h2><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Add-Migrations Init</span><br><span class="line">Update-Database</span><br></pre></td></tr></table></figure>]]></content>
+      
+      
+      <categories>
+          
+          <category> 备忘录 </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> CodeFirst </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
+      <title>Hello World</title>
+      <link href="/posts/4a17b156.html"/>
+      <url>/posts/4a17b156.html</url>
+      
+        <content type="html"><![CDATA[<p>Welcome to <a href="https://hexo.io/">Hexo</a>! This is your very first post. Check <a href="https://hexo.io/docs/">documentation</a> for more info. If you get any problems when using Hexo, you can find the answer in <a href="https://hexo.io/docs/troubleshooting.html">troubleshooting</a> or you can ask me on <a href="https://github.com/hexojs/hexo/issues">GitHub</a>.</p><h2 id="Quick-Start"><a href="#Quick-Start" class="headerlink" title="Quick Start"></a>Quick Start</h2><h3 id="Create-a-new-post"><a href="#Create-a-new-post" class="headerlink" title="Create a new post"></a>Create a new post</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">hexo new <span class="string">&quot;My New Post&quot;</span></span><br></pre></td></tr></table></figure><p>More info: <a href="https://hexo.io/docs/writing.html">Writing</a></p><h3 id="Run-server"><a href="#Run-server" class="headerlink" title="Run server"></a>Run server</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">hexo server</span><br></pre></td></tr></table></figure><p>More info: <a href="https://hexo.io/docs/server.html">Server</a></p><h3 id="Generate-static-files"><a href="#Generate-static-files" class="headerlink" title="Generate static files"></a>Generate static files</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">hexo generate</span><br></pre></td></tr></table></figure><p>More info: <a href="https://hexo.io/docs/generating.html">Generating</a></p><h3 id="Deploy-to-remote-sites"><a href="#Deploy-to-remote-sites" class="headerlink" title="Deploy to remote sites"></a>Deploy to remote sites</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">hexo deploy</span><br></pre></td></tr></table></figure><p>More info: <a href="https://hexo.io/docs/one-command-deployment.html">Deployment</a></p>]]></content>
+      
+      
+      
+    </entry>
+    
+    
+    
+    <entry>
       <title>设计模式之单例模式</title>
       <link href="/posts/1a4b62fe.html"/>
       <url>/posts/1a4b62fe.html</url>
@@ -23,19 +61,6 @@
             <tag> 单例模式 </tag>
             
         </tags>
-      
-    </entry>
-    
-    
-    
-    <entry>
-      <title>Hello World</title>
-      <link href="/posts/4a17b156.html"/>
-      <url>/posts/4a17b156.html</url>
-      
-        <content type="html"><![CDATA[<p>Welcome to <a href="https://hexo.io/">Hexo</a>! This is your very first post. Check <a href="https://hexo.io/docs/">documentation</a> for more info. If you get any problems when using Hexo, you can find the answer in <a href="https://hexo.io/docs/troubleshooting.html">troubleshooting</a> or you can ask me on <a href="https://github.com/hexojs/hexo/issues">GitHub</a>.</p><h2 id="Quick-Start"><a href="#Quick-Start" class="headerlink" title="Quick Start"></a>Quick Start</h2><h3 id="Create-a-new-post"><a href="#Create-a-new-post" class="headerlink" title="Create a new post"></a>Create a new post</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">hexo new <span class="string">&quot;My New Post&quot;</span></span><br></pre></td></tr></table></figure><p>More info: <a href="https://hexo.io/docs/writing.html">Writing</a></p><h3 id="Run-server"><a href="#Run-server" class="headerlink" title="Run server"></a>Run server</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">hexo server</span><br></pre></td></tr></table></figure><p>More info: <a href="https://hexo.io/docs/server.html">Server</a></p><h3 id="Generate-static-files"><a href="#Generate-static-files" class="headerlink" title="Generate static files"></a>Generate static files</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">hexo generate</span><br></pre></td></tr></table></figure><p>More info: <a href="https://hexo.io/docs/generating.html">Generating</a></p><h3 id="Deploy-to-remote-sites"><a href="#Deploy-to-remote-sites" class="headerlink" title="Deploy to remote sites"></a>Deploy to remote sites</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">hexo deploy</span><br></pre></td></tr></table></figure><p>More info: <a href="https://hexo.io/docs/one-command-deployment.html">Deployment</a></p>]]></content>
-      
-      
       
     </entry>
     
